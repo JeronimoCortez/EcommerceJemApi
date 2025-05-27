@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Categoria {
+  id Int @id @default(autoincrement()) @unique 
+  nombre String
+  productos Producto[]
+  tipoId Int
+  tipo Tipo @relation(fields: [tipoId], references: [id])
+}
+
+model Descuento{
+  id Int @id @default(autoincrement()) @unique 
+  inicio DateTime
+  fin DateTime
+  descuento Float
+  productos Producto[]
+}
+
+model Direccion {
+  id Int @id @default(autoincrement()) @unique 
+  calle String
+  localidad String 
+  cp String
+}
+
+model OrdenCompra {
+  id Int @id @default(autoincrement()) @unique 
+  usuarioId Int
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  fecha DateTime
+  precioTotal Float
+  metodoPago String
+  estado Estado @default(PENDIENTE)
+}
+
+model Producto {
+  id Int @id @default(autoincrement()) @unique 
+  nombre String
+  precio Float
+  categorias Categoria[]
+  descripcion String
+  productoTalles ProductoTalle[]
+  color String
+  marca String
+  descuentos Descuento[]
+}
+
+model ProductoTalle {
+  id         Int      @id @default(autoincrement())
+  producto   Producto @relation(fields: [productoId], references: [id])
+  productoId Int
+  talle      String
+  stock      Int
+}
+
+model Tipo{
+  id Int @id @default(autoincrement()) @unique 
+  nombre String
+  categoria Categoria[]
+}
+
+
+model Usuario {
+  id Int @id @default(autoincrement()) @unique 
+  nombre String
+  email String @unique
+  password String 
+  rol Role @default(USER)
+  ordenes OrdenCompra[]
+}
+
+enum Role{
+  USER
+  ADMIN
+}
+
+enum Estado{
+  PENDIENTE
+  EN_PROCESO
+  COMPLETADO
+}
