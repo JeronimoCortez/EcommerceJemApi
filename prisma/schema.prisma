@@ -23,6 +23,13 @@ model Descuento{
   productos Producto[]
 }
 
+model Detalle {
+  id Int @id @default(autoincrement()) @unique 
+  cantidad Int
+  productoId Int
+  producto  Producto @relation(fields: [productoId], references: [id])
+}
+
 model Direccion {
   id Int @id @default(autoincrement()) @unique 
   calle String
@@ -50,6 +57,7 @@ model Producto {
   color String
   marca String
   descuentos Descuento[]
+  detalles   Detalle[]
 }
 
 model ProductoTalle {

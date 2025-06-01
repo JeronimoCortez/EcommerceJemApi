@@ -1,12 +1,14 @@
-import { Request, Response } from 'express';
-import { OrdenCompra } from '../models/OrdenCompra.interface';
-import prisma from '../models/OrdenCompra';
+import { Request, Response } from "express";
+import prisma from "../models/PrismaClient";
+import { OrdenCompra } from "@prisma/client";
 
 export const ordenes = async (req: Request, res: Response): Promise<void> => {
   try {
     const all: OrdenCompra[] = await prisma.ordenCompra.findMany();
     if (all.length === 0) {
-      res.status(204).json({ message: 'No hay órdenes de compra en la base de datos' });
+      res
+        .status(204)
+        .json({ message: "No hay órdenes de compra en la base de datos" });
       return;
     }
     res.status(200).json(all);
@@ -31,11 +33,16 @@ export const orden = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createOrden = async (req: Request, res: Response): Promise<void> => {
+export const createOrden = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { usuarioId, fecha, precioTotal, metodoPago, estado } = req.body;
     if (!usuarioId || !fecha || !precioTotal || !metodoPago) {
-      res.status(204).json({ message: 'Debe completar todos los campos requeridos' });
+      res
+        .status(204)
+        .json({ message: "Debe completar todos los campos requeridos" });
       return;
     }
     const newOrden = await prisma.ordenCompra.create({
@@ -47,13 +54,18 @@ export const createOrden = async (req: Request, res: Response): Promise<void> =>
         estado,
       },
     });
-    res.status(201).json({ newOrden, message: 'Orden de compra creada con éxito' });
+    res
+      .status(201)
+      .json({ newOrden, message: "Orden de compra creada con éxito" });
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear la orden', error });
+    res.status(500).json({ message: "Error al crear la orden", error });
   }
 };
 
-export const updateOrden = async (req: Request, res: Response): Promise<void> => {
+export const updateOrden = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { id } = req.params;
   try {
     const updatedData = req.body;
@@ -64,16 +76,21 @@ export const updateOrden = async (req: Request, res: Response): Promise<void> =>
     });
     res.status(200).json(updated);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar la orden', error });
+    res.status(500).json({ message: "Error al actualizar la orden", error });
   }
 };
 
-export const deleteOrden = async (req: Request, res: Response): Promise<void> => {
+export const deleteOrden = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { id } = req.params;
   try {
-    const deleted = await prisma.ordenCompra.delete({ where: { id: Number(id) } });
-    res.status(200).json({ deleted, message: 'Orden eliminada con éxito' });
+    const deleted = await prisma.ordenCompra.delete({
+      where: { id: Number(id) },
+    });
+    res.status(200).json({ deleted, message: "Orden eliminada con éxito" });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar la orden', error });
+    res.status(500).json({ message: "Error al eliminar la orden", error });
   }
 };

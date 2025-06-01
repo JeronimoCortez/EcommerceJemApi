@@ -1,12 +1,12 @@
-import { Request, Response } from 'express';
-import { ProductoTalle } from '../models/ProductoTalle.interface';
-import prisma from '../models/ProductoTalle';
+import { Request, Response } from "express";
+import prisma from "../models/PrismaClient";
+import { ProductoTalle } from "@prisma/client";
 
 export const talles = async (_: Request, res: Response): Promise<void> => {
   try {
     const list: ProductoTalle[] = await prisma.productoTalle.findMany();
     if (list.length === 0) {
-      res.status(204).json({ message: 'No hay talles en la base de datos' });
+      res.status(204).json({ message: "No hay talles en la base de datos" });
       return;
     }
     res.status(200).json(list);
@@ -31,36 +31,54 @@ export const talle = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createTalle = async (req: Request, res: Response): Promise<void> => {
+export const createTalle = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { productoId, talle, stock } = req.body;
-    if (!productoId || !talle || stock === undefined) {
-      res.status(204).json({ message: 'Debe completar todos los campos requeridos' });
+    if (!talle || !stock) {
+      res
+        .status(204)
+        .json({ message: "Debe completar todos los campos requeridos" });
       return;
     }
-    const newTalle = await prisma.productoTalle.create({ data: { productoId, talle, stock } });
-    res.status(201).json({ newTalle, message: 'Talle creado con éxito' });
+    const newTalle = await prisma.productoTalle.create({
+      data: { productoId, talle, stock },
+    });
+    res.status(201).json({ newTalle, message: "Talle creado con éxito" });
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear el talle', error });
+    res.status(500).json({ message: "Error al crear el talle", error });
   }
 };
 
-export const updateTalle = async (req: Request, res: Response): Promise<void> => {
+export const updateTalle = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { id } = req.params;
   try {
-    const updated = await prisma.productoTalle.update({ where: { id: Number(id) }, data: req.body });
+    const updated = await prisma.productoTalle.update({
+      where: { id: Number(id) },
+      data: req.body,
+    });
     res.status(200).json(updated);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el talle', error });
+    res.status(500).json({ message: "Error al actualizar el talle", error });
   }
 };
 
-export const deleteTalle = async (req: Request, res: Response): Promise<void> => {
+export const deleteTalle = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { id } = req.params;
   try {
-    const deleted = await prisma.productoTalle.delete({ where: { id: Number(id) } });
-    res.status(200).json({ deleted, message: 'Talle eliminado con éxito' });
+    const deleted = await prisma.productoTalle.delete({
+      where: { id: Number(id) },
+    });
+    res.status(200).json({ deleted, message: "Talle eliminado con éxito" });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar el talle', error });
+    res.status(500).json({ message: "Error al eliminar el talle", error });
   }
 };
