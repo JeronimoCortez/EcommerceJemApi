@@ -8,88 +8,99 @@ datasource db {
 }
 
 model Categoria {
-  id Int @id @default(autoincrement()) @unique 
-  nombre String
+  id        Int        @id @unique @default(autoincrement())
+  activo    Boolean    @default(true)
+  nombre    String
   productos Producto[]
-  tipoId Int
-  tipo Tipo @relation(fields: [tipoId], references: [id])
+  tipoId    Int
+  tipo      Tipo       @relation(fields: [tipoId], references: [id])
 }
 
-model Descuento{
-  id Int @id @default(autoincrement()) @unique 
-  inicio DateTime
-  fin DateTime
+model Descuento {
+  id        Int        @id @unique @default(autoincrement())
+  activo    Boolean    @default(true)
+  inicio    DateTime
+  fin       DateTime
   descuento Float
   productos Producto[]
 }
 
 model Detalle {
-  id Int @id @default(autoincrement()) @unique 
-  cantidad Int
+  id         Int         @id @unique @default(autoincrement())
+  activo     Boolean     @default(true)
+  cantidad   Int
   productoId Int
-  producto  Producto @relation(fields: [productoId], references: [id])
+  producto   Producto    @relation(fields: [productoId], references: [id])
+  ordenId    Int
+  orden      OrdenCompra @relation(fields: [ordenId], references: [id])
 }
 
 model Direccion {
-  id Int @id @default(autoincrement()) @unique 
-  calle String
-  localidad String 
-  cp String
+  id        Int     @id @unique @default(autoincrement())
+  activo    Boolean @default(true)
+  calle     String
+  localidad String
+  cp        String
 }
 
 model OrdenCompra {
-  id Int @id @default(autoincrement()) @unique 
-  usuarioId Int
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
-  fecha DateTime
+  id          Int       @id @unique @default(autoincrement())
+  activo      Boolean   @default(true)
+  usuarioId   Int
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  fecha       DateTime
   precioTotal Float
-  metodoPago String
-  estado Estado @default(PENDIENTE)
+  metodoPago  String
+  detalles    Detalle[]
+  estado      Estado    @default(PENDIENTE)
 }
 
 model Producto {
-  id Int @id @default(autoincrement()) @unique 
-  nombre String
-  precio Float
-  categorias Categoria[]
-  descripcion String
+  id             Int             @id @unique @default(autoincrement())
+  activo         Boolean         @default(true)
+  nombre         String
+  precio         Float
+  categorias     Categoria[]
+  descripcion    String
   productoTalles ProductoTalle[]
-  color String
-  marca String
-  descuentos Descuento[]
-  detalles   Detalle[]
+  color          String
+  marca          String
+  descuentos     Descuento[]
+  detalles       Detalle[]
 }
 
 model ProductoTalle {
   id         Int      @id @default(autoincrement())
-  producto   Producto @relation(fields: [productoId], references: [id])
+  activo     Boolean  @default(true)
   productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
   talle      String
   stock      Int
 }
 
-model Tipo{
-  id Int @id @default(autoincrement()) @unique 
-  nombre String
+model Tipo {
+  id        Int         @id @unique @default(autoincrement())
+  activo    Boolean     @default(true)
+  nombre    String
   categoria Categoria[]
 }
 
-
 model Usuario {
-  id Int @id @default(autoincrement()) @unique 
-  nombre String
-  email String @unique
-  password String 
-  rol Role @default(USER)
-  ordenes OrdenCompra[]
+  id       Int           @id @unique @default(autoincrement())
+  activo   Boolean       @default(true)
+  nombre   String
+  email    String        @unique
+  password String
+  rol      Role          @default(USER)
+  ordenes  OrdenCompra[]
 }
 
-enum Role{
+enum Role {
   USER
   ADMIN
 }
 
-enum Estado{
+enum Estado {
   PENDIENTE
   EN_PROCESO
   COMPLETADO
