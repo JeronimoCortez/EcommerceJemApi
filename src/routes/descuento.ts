@@ -1,4 +1,5 @@
 import express from "express";
+import { autenticacionToken } from "../services/usuario.services";
 import {
   crearDescuento,
   deleteDescuento,
@@ -11,6 +12,6 @@ export const descuentoRouter = express.Router();
 
 descuentoRouter.get("/", descuentos);
 descuentoRouter.get("/:id", descuento);
-descuentoRouter.post("/", crearDescuento);
-descuentoRouter.put("/:id", updateDescuento);
-descuentoRouter.delete("/:id", deleteDescuento);
+descuentoRouter.post("/", autenticacionToken, crearDescuento);
+descuentoRouter.put("/:id", autenticacionToken, updateDescuento);
+descuentoRouter.delete("/:id", autenticacionToken, deleteDescuento);

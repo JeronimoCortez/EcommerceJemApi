@@ -6,11 +6,12 @@ import {
   ordenes,
   updateOrden,
 } from "../controllers/ordenCompraController";
+import { autenticacionToken } from "../services/usuario.services";
 
 export const ordenCompraRouter = express.Router();
 
 ordenCompraRouter.get("/", ordenes);
 ordenCompraRouter.get("/:id", orden);
-ordenCompraRouter.post("/", createOrden);
-ordenCompraRouter.put("/:id", updateOrden);
-ordenCompraRouter.delete("/:id", deleteOrden);
+ordenCompraRouter.post("/", autenticacionToken, createOrden);
+ordenCompraRouter.put("/:id", autenticacionToken, updateOrden);
+ordenCompraRouter.delete("/:id", autenticacionToken, deleteOrden);
