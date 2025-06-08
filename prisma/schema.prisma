@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Categoria {
-  id        Int        @id @unique @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   activo    Boolean    @default(true)
   nombre    String
   productos Producto[]
@@ -17,26 +17,27 @@ model Categoria {
 }
 
 model Descuento {
-  id        Int        @id @unique @default(autoincrement())
-  activo    Boolean    @default(true)
-  inicio    DateTime
-  fin       DateTime
-  descuento Float
-  productos Producto[]
+  id         Int        @id @default(autoincrement())
+  activo     Boolean    @default(true)
+  inicio     DateTime
+  fin        DateTime
+  descuento  Float
+  productoId Int?
+  producto   Producto?   @relation(fields: [productoId], references: [id])
 }
 
 model Detalle {
-  id         Int         @id @unique @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   activo     Boolean     @default(true)
   cantidad   Int
   productoId Int
   producto   Producto    @relation(fields: [productoId], references: [id])
-  ordenId    Int
-  orden      OrdenCompra @relation(fields: [ordenId], references: [id])
+  ordenId    Int?
+  orden      OrdenCompra? @relation(fields: [ordenId], references: [id])
 }
 
 model Direccion {
-  id        Int     @id @unique @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   activo    Boolean @default(true)
   calle     String
   localidad String
@@ -44,7 +45,7 @@ model Direccion {
 }
 
 model OrdenCompra {
-  id          Int       @id @unique @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   activo      Boolean   @default(true)
   usuarioId   Int
   usuario     Usuario   @relation(fields: [usuarioId], references: [id])
@@ -56,15 +57,16 @@ model OrdenCompra {
 }
 
 model Producto {
-  id             Int             @id @unique @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   activo         Boolean         @default(true)
   nombre         String
   precio         Float
-  categorias     Categoria[]
   descripcion    String
-  productoTalles ProductoTalle[]
   color          String
   marca          String
+  categoriaId    Int?
+  categoria      Categoria?       @relation(fields: [categoriaId], references: [id])
+  productoTalles ProductoTalle[]
   descuentos     Descuento[]
   detalles       Detalle[]
 }
@@ -79,20 +81,20 @@ model ProductoTalle {
 }
 
 model Tipo {
-  id        Int         @id @unique @default(autoincrement())
-  activo    Boolean     @default(true)
-  nombre    String
-  categoria Categoria[]
+  id         Int         @id @default(autoincrement())
+  activo     Boolean     @default(true)
+  nombre     String
+  categorias Categoria[]
 }
 
 model Usuario {
-  id       Int           @id @unique @default(autoincrement())
-  activo   Boolean       @default(true)
-  nombre   String
-  email    String        @unique
-  password String
-  rol      Role          @default(USER)
-  ordenes  OrdenCompra[]
+  id        Int           @id @default(autoincrement())
+  activo    Boolean       @default(true)
+  nombre    String
+  email     String        @unique
+  password  String
+  rol       Role          @default(USER)
+  ordenes   OrdenCompra[]
 }
 
 enum Role {

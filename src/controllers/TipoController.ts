@@ -4,7 +4,11 @@ import prisma from "../models/PrismaClient";
 
 export const tipos = async (req: Request, res: Response): Promise<void> => {
   try {
-    const tiposDb: Tipo[] = await prisma.tipo.findMany();
+    const tiposDb: Tipo[] = await prisma.tipo.findMany({
+      include: {
+        categorias: true,
+      },
+    });
 
     if (tiposDb.length === 0) {
       res
@@ -23,8 +27,9 @@ export const tipo = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const tipoDb: Tipo | null = await prisma.tipo.findUnique({
-      where: {
-        id: Number(id),
+      where: { id: Number(id) },
+      include: {
+        categorias: true,
       },
     });
 

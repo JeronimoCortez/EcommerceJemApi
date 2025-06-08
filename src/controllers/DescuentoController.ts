@@ -84,8 +84,9 @@ export const updateDescuento = async (req: Request, res: Response) => {
 export const deleteDescuento = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const descuentoEliminado = await prisma.descuento.delete({
+    const descuentoEliminado = await prisma.descuento.update({
       where: { id: Number(id) },
+      data: { activo: false },
     });
     res
       .status(200)

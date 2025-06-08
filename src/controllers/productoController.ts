@@ -4,7 +4,14 @@ import { Producto } from "@prisma/client";
 
 export const productos = async (req: Request, res: Response): Promise<void> => {
   try {
-    const list: Producto[] = await prisma.producto.findMany();
+    const list: Producto[] = await prisma.producto.findMany({
+      include: {
+        categoria: true,
+        productoTalles: true,
+        descuentos: true,
+        detalles: true,
+      },
+    });
     if (list.length === 0) {
       res.status(204).json({ message: "No hay productos en la base de datos" });
       return;
@@ -20,6 +27,12 @@ export const producto = async (req: Request, res: Response): Promise<void> => {
   try {
     const found: Producto | null = await prisma.producto.findUnique({
       where: { id: Number(id) },
+      include: {
+        categoria: true,
+        productoTalles: true,
+        descuentos: true,
+        detalles: true,
+      },
     });
     if (!found) {
       res
@@ -44,11 +57,19 @@ export const createProducto = async (
       descripcion,
       color,
       marca,
-      categoriaIds = [],
+      categoria,
       descuentoIds = [],
-      productoTalles = [],
+      talles = [],
     } = req.body;
-    if (!nombre || !precio || !descripcion || !color || !marca) {
+    if (
+      !nombre ||
+      !precio ||
+      !descripcion ||
+      !color ||
+      !marca ||
+      talles.length === 0 ||
+      !categoria
+    ) {
       res
         .status(204)
         .json({ message: "Debe completar todos los campos requeridos" });
@@ -61,15 +82,18 @@ export const createProducto = async (
         descripcion,
         color,
         marca,
-        categorias: { connect: categoriaIds.map((id: number) => ({ id })) },
+        categoria: {
+          connect: { id: categoria },
+        },
         descuentos: { connect: descuentoIds.map((id: number) => ({ id })) },
         productoTalles: {
-          connect: productoTalles.map((id: number) => ({ id })),
+          connect: talles.map((id: number) => ({ id })),
         },
       },
     });
     res.status(201).json({ newProd, message: "Producto creado con éxito" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Error al crear el producto", error });
   }
 };
@@ -80,13 +104,13 @@ export const updateProducto = async (
 ): Promise<void> => {
   const { id } = req.params;
   try {
-    const { categoriaIds, descuentoIds, ...rest } = req.body;
+    const { productoTalles, descuentoIds, ...rest } = req.body;
     const updated = await prisma.producto.update({
       where: { id: Number(id) },
       data: {
         ...rest,
-        categorias: categoriaIds
-          ? { set: categoriaIds.map((cid: number) => ({ id: cid })) }
+        productoTalles: productoTalles
+          ? { set: productoTalles.map((cid: number) => ({ id: cid })) }
           : undefined,
         descuentos: descuentoIds
           ? { set: descuentoIds.map((did: number) => ({ id: did })) }
@@ -105,9 +129,53 @@ export const deleteProducto = async (
 ): Promise<void> => {
   const { id } = req.params;
   try {
-    const deleted = await prisma.producto.delete({ where: { id: Number(id) } });
+    const deleted = await prisma.producto.update({
+      where: { id: Number(id) },
+      data: { activo: false },
+    });
     res.status(200).json({ deleted, message: "Producto eliminado con éxito" });
   } catch (error) {
     res.status(500).json({ message: "Error al eliminar el producto", error });
+  }
+};
+
+export const addDiscount = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { idProduct, idDiscount } = req.params;
+  try {
+    const product: Producto | null = await prisma.producto.findUnique({
+      where: { id: Number(idProduct) },
+      include: { descuentos: true },
+    });
+    const discount = await prisma.descuento.findUnique({
+      where: { id: Number(idDiscount) },
+    });
+    if (!product) {
+      res
+        .status(404)
+        .json({ message: "No se encontro el producto en la base de datos" });
+      return;
+    }
+
+    if (!discount) {
+      res
+        .status(404)
+        .json({ message: "No se encontro el descuento en la base de datos" });
+
+      return;
+    }
+    const productUpdate = await prisma.producto.update({
+      where: { id: Number(idProduct) },
+      data: {
+        descuentos: {
+          connect: { id: Number(idDiscount) },
+        },
+      },
+    });
+    res.status(200).json({ message: "Descuento agregado con exito" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al agregar descuento" });
   }
 };

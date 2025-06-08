@@ -3,7 +3,11 @@ import prisma from "../models/PrismaClient";
 
 export const categorias = async (req: Request, res: Response) => {
   try {
-    const categoriasDb = await prisma.categoria.findMany();
+    const categoriasDb = await prisma.categoria.findMany({
+      include: {
+        productos: true,
+      },
+    });
 
     if (categoriasDb.length === 0) {
       res
@@ -23,6 +27,9 @@ export const categoria = async (req: Request, res: Response) => {
   try {
     const categoriaDb = await prisma.categoria.findUnique({
       where: { id: Number(id) },
+      include: {
+        productos: true,
+      },
     });
 
     if (!categoriaDb) {
@@ -76,8 +83,9 @@ export const updateCategoria = async (req: Request, res: Response) => {
 export const deleteCategoria = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const categoriaEliminada = await prisma.categoria.delete({
+    const categoriaEliminada = await prisma.categoria.update({
       where: { id: Number(id) },
+      data: { activo: false },
     });
 
     res

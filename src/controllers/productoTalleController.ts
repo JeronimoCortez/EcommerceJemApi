@@ -74,8 +74,9 @@ export const deleteTalle = async (
 ): Promise<void> => {
   const { id } = req.params;
   try {
-    const deleted = await prisma.productoTalle.delete({
+    const deleted = await prisma.productoTalle.update({
       where: { id: Number(id) },
+      data: { activo: false },
     });
     res.status(200).json({ deleted, message: "Talle eliminado con éxito" });
   } catch (error) {

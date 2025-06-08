@@ -77,8 +77,9 @@ export const updateDireccion = async (req: Request, res: Response) => {
 export const deleteDireccion = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const direccionEliminada = await prisma.direccion.delete({
+    const direccionEliminada = await prisma.direccion.update({
       where: { id: Number(id) },
+      data: { activo: false },
     });
     res
       .status(200)

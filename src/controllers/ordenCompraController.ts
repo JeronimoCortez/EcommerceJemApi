@@ -4,7 +4,11 @@ import { OrdenCompra } from "@prisma/client";
 
 export const ordenes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const all: OrdenCompra[] = await prisma.ordenCompra.findMany();
+    const all: OrdenCompra[] = await prisma.ordenCompra.findMany({
+      include: {
+        detalles: true,
+      },
+    });
     if (all.length === 0) {
       res
         .status(204)
@@ -22,6 +26,9 @@ export const orden = async (req: Request, res: Response): Promise<void> => {
   try {
     const found: OrdenCompra | null = await prisma.ordenCompra.findUnique({
       where: { id: Number(id) },
+      include: {
+        detalles: true,
+      },
     });
     if (!found) {
       res.status(201).json({ message: `No existe una orden con el id ${id}` });
@@ -38,20 +45,46 @@ export const createOrden = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { usuarioId, fecha, precioTotal, metodoPago, estado } = req.body;
-    if (!usuarioId || !fecha || !precioTotal || !metodoPago) {
+    const { usuarioId, fecha, precioTotal, metodoPago, estado, detallesIds } =
+      req.body;
+    if (
+      !usuarioId ||
+      !fecha ||
+      !precioTotal ||
+      !metodoPago ||
+      detallesIds.length === 0
+    ) {
       res
         .status(204)
         .json({ message: "Debe completar todos los campos requeridos" });
       return;
     }
+
+    const detalles = await prisma.detalle.findMany({
+      where: { id: { in: detallesIds } },
+      include: { producto: { select: { precio: true } } },
+    });
+
+    if (detalles.length !== detallesIds.length) {
+      res.status(400).json({ message: "Algunos detalles no existen" });
+      return;
+    }
+
+    const total = detalles.reduce(
+      (total, detalle) => total + detalle.cantidad * detalle.producto.precio,
+      0
+    );
+
     const newOrden = await prisma.ordenCompra.create({
       data: {
         usuarioId,
         fecha: new Date(fecha),
-        precioTotal,
+        precioTotal: total,
         metodoPago,
         estado,
+        detalles: {
+          connect: detallesIds.map((id: number) => ({ id })),
+        },
       },
     });
     res
@@ -86,8 +119,9 @@ export const deleteOrden = async (
 ): Promise<void> => {
   const { id } = req.params;
   try {
-    const deleted = await prisma.ordenCompra.delete({
+    const deleted = await prisma.ordenCompra.update({
       where: { id: Number(id) },
+      data: { activo: false },
     });
     res.status(200).json({ deleted, message: "Orden eliminada con éxito" });
   } catch (error) {

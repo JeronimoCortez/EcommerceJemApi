@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  addDiscount,
   createProducto,
   deleteProducto,
   producto,
@@ -15,3 +16,4 @@ productoRouter.get("/:id", producto);
 productoRouter.post("/", autenticacionToken, createProducto);
 productoRouter.put("/:id", autenticacionToken, updateProducto);
 productoRouter.delete("/:id", autenticacionToken, deleteProducto);
+productoRouter.patch("/:idProduct/addDiscount/:idDiscount", addDiscount);

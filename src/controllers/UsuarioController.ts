@@ -5,7 +5,11 @@ import { generatedToken } from "../services/auth.services";
 
 export const usuarios = async (req: Request, res: Response) => {
   try {
-    const usuariosDb = await prisma.usuario.findMany();
+    const usuariosDb = await prisma.usuario.findMany({
+      include: {
+        ordenes: true,
+      },
+    });
     if (usuariosDb.length === 0) {
       res.status(204).json({ message: "No hay usuarios en la base de datos" });
       return;
@@ -22,6 +26,9 @@ export const usuario = async (req: Request, res: Response) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { id: Number(id) },
+      include: {
+        ordenes: true,
+      },
     });
 
     if (!usuario) {
@@ -133,8 +140,9 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const usuarioEliminado = await prisma.usuario.delete({
+    const usuarioEliminado = await prisma.usuario.update({
       where: { id: Number(id) },
+      data: { activo: false },
     });
 
     res.status(200).json({
