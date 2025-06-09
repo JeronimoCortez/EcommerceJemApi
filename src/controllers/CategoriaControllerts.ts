@@ -22,6 +22,28 @@ export const categorias = async (req: Request, res: Response) => {
   }
 };
 
+export const categoriasActivas = async (req: Request, res: Response) => {
+  try {
+    const categoriasDb = await prisma.categoria.findMany({
+      include: {
+        productos: true,
+      },
+    });
+
+    if (categoriasDb.length === 0) {
+      res
+        .status(204)
+        .json({ message: "No hay categorias en la base de datos" });
+      return;
+    }
+    const categoriasFiltradas = categoriasDb.filter((p) => p.activo === true);
+
+    res.status(200).json(categoriasFiltradas);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const categoria = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

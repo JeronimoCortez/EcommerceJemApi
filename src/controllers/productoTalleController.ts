@@ -15,6 +15,23 @@ export const talles = async (_: Request, res: Response): Promise<void> => {
   }
 };
 
+export const tallesActivos = async (
+  _: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const list: ProductoTalle[] = await prisma.productoTalle.findMany();
+    if (list.length === 0) {
+      res.status(204).json({ message: "No hay talles en la base de datos" });
+      return;
+    }
+    const tallesFiltrados = list.filter((t) => t.activo === true);
+    res.status(200).json(list);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const talle = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {

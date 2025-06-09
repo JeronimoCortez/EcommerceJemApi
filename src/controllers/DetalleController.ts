@@ -16,6 +16,20 @@ export const detalles = async (req: Request, res: Response) => {
   }
 };
 
+export const detallesFiltrados = async (req: Request, res: Response) => {
+  try {
+    const detallesDb = await prisma.detalle.findMany();
+    if (detallesDb.length === 0) {
+      res.status(204).json({ message: "No hay detalles cargados en la bd" });
+      return;
+    }
+    const detallesFiltrados = detallesDb.filter((d) => d.activo === true);
+    res.status(200).json(detallesDb);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const detalle = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

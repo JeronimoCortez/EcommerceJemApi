@@ -5,6 +5,7 @@ import {
   deleteProducto,
   producto,
   productos,
+  productosActivos,
   updateProducto,
 } from "../controllers/productoController";
 import { autenticacionToken } from "../services/usuario.services";
@@ -12,6 +13,7 @@ import { autenticacionToken } from "../services/usuario.services";
 export const productoRouter = express.Router();
 
 productoRouter.get("/", productos);
+productoRouter.get("/activos", productosActivos);
 productoRouter.get("/:id", producto);
 productoRouter.post("/", autenticacionToken, createProducto);
 productoRouter.put("/:id", autenticacionToken, updateProducto);

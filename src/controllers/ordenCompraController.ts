@@ -21,6 +21,29 @@ export const ordenes = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const ordenesActivas = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const all: OrdenCompra[] = await prisma.ordenCompra.findMany({
+      include: {
+        detalles: true,
+      },
+    });
+    if (all.length === 0) {
+      res
+        .status(204)
+        .json({ message: "No hay órdenes de compra en la base de datos" });
+      return;
+    }
+    const ordenesFiltradas = all.filter((o) => o.activo == true);
+    res.status(200).json(ordenesFiltradas);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const orden = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {

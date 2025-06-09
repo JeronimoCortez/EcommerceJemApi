@@ -23,6 +23,32 @@ export const tipos = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const tiposActivos = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const tiposDb: Tipo[] = await prisma.tipo.findMany({
+      include: {
+        categorias: true,
+      },
+    });
+
+    if (tiposDb.length === 0) {
+      res
+        .status(204)
+        .json({ message: "La tabla tipo esta vacia en la base de datos" });
+      return;
+    }
+
+    const tiposfiltrados = tiposDb.filter((t) => t.activo === true);
+
+    res.status(200).json(tiposfiltrados);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const tipo = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {

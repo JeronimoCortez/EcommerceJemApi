@@ -21,6 +21,26 @@ export const usuarios = async (req: Request, res: Response) => {
   }
 };
 
+export const usuariosActivos = async (req: Request, res: Response) => {
+  try {
+    const usuariosDb = await prisma.usuario.findMany({
+      include: {
+        ordenes: true,
+      },
+    });
+    if (usuariosDb.length === 0) {
+      res.status(204).json({ message: "No hay usuarios en la base de datos" });
+      return;
+    }
+
+    const usuariosFiltrados = usuariosDb.filter((u) => u.activo === true);
+
+    res.status(200).json(usuariosFiltrados);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const usuario = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

@@ -15,6 +15,21 @@ export const descuentos = async (req: Request, res: Response) => {
   }
 };
 
+export const descuentosFiltrados = async (req: Request, res: Response) => {
+  try {
+    const descuentosDb = await prisma.descuento.findMany();
+    if (descuentosDb.length === 0) {
+      res.status(204).json({ message: "No hay descuentos cargados en la bd" });
+      return;
+    }
+    const descuentosFiltrados = descuentosDb.filter((d) => d.activo === true);
+
+    res.status(200).json(descuentosFiltrados);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const descuento = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

@@ -15,6 +15,20 @@ export const direcciones = async (req: Request, res: Response) => {
   }
 };
 
+export const direccionesActivas = async (req: Request, res: Response) => {
+  try {
+    const direccionesDb = await prisma.direccion.findMany();
+    if (direccionesDb.length === 0) {
+      res.status(204).json({ message: "No hay direcciones cargadas en la bd" });
+      return;
+    }
+    const direccionesFiltradas = direccionesDb.filter((d) => d.activo === true);
+    res.status(200).json(direccionesDb);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const direccion = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

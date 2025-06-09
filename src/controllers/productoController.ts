@@ -22,6 +22,30 @@ export const productos = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const productosActivos = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const list: Producto[] = await prisma.producto.findMany({
+      include: {
+        categoria: true,
+        productoTalles: true,
+        descuentos: true,
+        detalles: true,
+      },
+    });
+    if (list.length === 0) {
+      res.status(204).json({ message: "No hay productos en la base de datos" });
+      return;
+    }
+    const productosFiltrados = list.filter((p) => p.activo === true);
+    res.status(200).json(productosFiltrados);
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
 export const producto = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
